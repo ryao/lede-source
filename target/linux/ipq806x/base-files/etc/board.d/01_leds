@@ -6,6 +6,17 @@
 . /lib/functions/uci-defaults.sh
 . /lib/ipq806x.sh
 
+wifi_rfkill_check() {
+	local disabled
+	config_get disabled $1 disabled
+	if [ "$disabled" = "1" ] ; then
+		echo "0"
+	else
+		echo "1"
+	fi
+		
+}
+
 board_config_update
 
 board=$(ipq806x_board_name)
@@ -26,6 +37,10 @@ r7500)
 	ucidef_set_led_ide "esata" "eSATA" "r7500:amber:esata"
 	ucidef_set_led_default "wps" "WPS" "r7500:white:wps" "0"
 	ucidef_set_led_default "rfkill" "rfkill" "r7500:white:rfkill" "0"
+	;;
+ea8500)
+	ucidef_set_led_wlan		"wifi" "WIFI" "ea8500:green:wifi" "phy0radio"
+	ucidef_set_led_default	"wps" "WPS" "ea8500:green:wps" "0"
 	;;
 *)
 	;;
