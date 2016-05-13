@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (C) 2014 OpenWrt.org
 
 . /lib/functions/leds.sh
 . /lib/ipq806x.sh
@@ -7,6 +8,9 @@ get_status_led() {
 	case $(ipq806x_board_name) in
 	c2600)
 		status_led="status:blue"
+		;;
+	ea8500)
+		status_led="ea8500:white:power"
 		;;
 	esac
 }
