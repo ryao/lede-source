@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# Copyright (C) 2014-2015 OpenWrt.org
+#
+
+#dummy to allow sourcing
+append() {
+:	
+}
+. /lib/upgrade/platform.sh
+. /lib/upgrade/linksys.sh
+
+board=$(ipq806x_board_name)
+
+show_help() {
+	  echo "USAGE:"
+	  if [ $board="ea8500" ]; then
+		  echo -e "\t sysrevert -r \t\t Restores previous firmware (without reflashing) and reboots."
+		  echo -e "\t sysrevert -f [image] \t Flash [image] to alternative partition setting it as default and reboots."
+	  else	
+		  echo -e "\t sysrevert -f [image] \t Flash [image] to partition and reboots."
+	  fi
+}
+
+ 
+while getopts ":hrf:" opt; do
+  case $opt in
+    r)
+		[ $board="ea8500" ] || {
+			show_help
+			exit 1
+		}
+		part_label="$(linksys_get_target_firmware)"
+
+		[ -n "$part_label" ] || {
+			echo "cannot find target partition"
+			exit 1
+		}
+		reboot
+		exit 0
+		;;
+
+    f)
+		[ -f $OPTARG ] || { 
+				echo "cannot find source image"
+				exit 1
+			}
+		
+		if [ $board="ea8500" ]; then
+			part_label="$(linksys_get_target_firmware)"
+			[ -n "$part_label" ] || {
+				echo "cannot find target partition"
+				exit 1
+			}
+		else
+			part_label=$(PART_NAME)
+		fi
+		
+		# erase everything to be safe
+		mtd erase $part_label
+		# write image and reboot
+		mtd -n -r write $OPTARG $part_label
+		exit 0
+		;;
+    h\?)
+		show_help
+		exit 1
+		;;
+    :)
+		echo "Option -$OPTARG requires an argument." >&2
+		show_help
+		exit 1
+		;;
+  esac
+done
+
+show_help
+exit 1
+
