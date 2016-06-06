@@ -21,14 +21,14 @@
  	if (ret) {
  		ath10k_err(ar, "could not fetch firmware files (%d)\n", ret);
 @@ -1892,11 +1892,14 @@ static int ath10k_core_probe_fw(struct a
- 			   "could not load pre cal data: %d\n", ret);
- 	}
  
+	ath10k_debug_print_hwfw_info(ar);
+
 -	ret = ath10k_core_get_board_id_from_otp(ar);
 -	if (ret && ret != -EOPNOTSUPP) {
 -		ath10k_err(ar, "failed to get board id from otp: %d\n",
 -			   ret);
--		goto err_free_firmware_files;
+-		return ret;
 +	/* otp and board file not needed if calibration data is present */
 +	if (calret) {
 +		ret = ath10k_core_get_board_id_from_otp(ar);
